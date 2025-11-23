@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -34,6 +35,8 @@ func main() {
 		case Type:
 			if isBuiltinOp(argv[0]) {
 				fmt.Printf("%s is a shell builtin\n", argv[0])
+			} else if path, ok := isPathCommand(argv[0]); ok {
+				fmt.Printf("%s is %s\n", argv[0], path)
 			} else {
 				fmt.Println(argv[0] + ": not found")
 			}
@@ -50,4 +53,30 @@ func isBuiltinOp(op string) bool {
 	}
 
 	return false
+}
+
+func isPathCommand(op string) (string, bool) {
+	path := os.Getenv("PATH")
+	dirs := strings.Split(path, string(os.PathListSeparator))
+
+	for _, dir := range dirs {
+		files, err := os.ReadDir(dir)
+		if err != nil {
+			log.Printf("broken dir: %s", err)
+			continue
+		}
+
+		for _, file := range files {
+			absPath := dir + string(os.PathSeparator) + file.Name()
+			fileInfo, _ := file.Info()
+			fmt.Printf("%s, %s\n", fileInfo.Name(), op)
+			if fileInfo.Name() == op {
+				if fileInfo.Mode()&0111 != 0 {
+					return absPath, true
+				}
+			}
+		}
+	}
+
+	return "", false
 }
