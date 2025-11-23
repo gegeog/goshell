@@ -27,7 +27,7 @@ func main() {
 
 		switch op {
 		case Exit:
-			os.Exit(1)
+			os.Exit(0)
 		case Echo:
 			fmt.Println(strings.Join(argv, " "))
 		default:
