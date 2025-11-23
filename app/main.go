@@ -10,6 +10,7 @@ import (
 const (
 	Exit = "exit"
 	Echo = "echo"
+	Type = "type"
 )
 
 func main() {
@@ -30,8 +31,23 @@ func main() {
 			os.Exit(0)
 		case Echo:
 			fmt.Println(strings.Join(argv, " "))
+		case Type:
+			if isBuiltinOp(argv[0]) {
+				fmt.Printf("%s is a shell builtin\n", argv[0])
+			} else {
+				fmt.Println(argv[0] + ": not found")
+			}
 		default:
 			fmt.Println(op + ": command not found")
 		}
 	}
+}
+
+func isBuiltinOp(op string) bool {
+	switch op {
+	case Type, Exit, Echo:
+		return true
+	}
+
+	return false
 }
