@@ -3,8 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -55,6 +58,23 @@ func isBuiltinOp(op string) bool {
 	return false
 }
 
+func isExecutable(info fs.FileInfo) bool {
+	// Windows logic: Check file extension
+	if runtime.GOOS == "windows" {
+		ext := strings.ToLower(filepath.Ext(info.Name()))
+		switch ext {
+		case ".exe", ".bat", ".cmd", ".ps1":
+			return true
+		default:
+			return false
+		}
+	}
+
+	// Unix logic: Check execute bit (0111 octal = 73 decimal)
+	// We check if at least one execute bit is set (Owner, Group, or Other)
+	return info.Mode()&0111 != 0
+}
+
 func isPathCommand(op string) (string, bool) {
 	path := os.Getenv("PATH")
 	dirs := strings.Split(path, string(os.PathListSeparator))
@@ -69,11 +89,9 @@ func isPathCommand(op string) (string, bool) {
 		for _, file := range files {
 			absPath := dir + string(os.PathSeparator) + file.Name()
 			fileInfo, _ := file.Info()
-			fmt.Printf("%s, %s\n", fileInfo.Name(), op)
-			if fileInfo.Name() == op {
-				if fileInfo.Mode()&0111 != 0 {
-					return absPath, true
-				}
+			fileName := strings.Split(fileInfo.Name(), ".")[0]
+			if fileName == op && isExecutable(fileInfo) {
+				return absPath, true
 			}
 		}
 	}
