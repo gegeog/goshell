@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -92,7 +91,7 @@ func isPathCommand(op string) (string, bool) {
 	for _, dir := range dirs {
 		files, err := os.ReadDir(dir)
 		if err != nil {
-			log.Printf("broken dir: %s", err)
+			// log.Printf("broken dir: %s", err)
 			continue
 		}
 
