@@ -48,7 +48,7 @@ func main() {
 				cmd := exec.Command(op, argv...)
 				out, err := cmd.Output()
 				if err != nil {
-					panic(err)
+					break
 				}
 				fmt.Println(string(out))
 			} else {
@@ -99,8 +99,12 @@ func isPathCommand(op string) (string, bool) {
 			absPath := dir + string(os.PathSeparator) + file.Name()
 			fileInfo, _ := file.Info()
 			fileName := strings.Split(fileInfo.Name(), ".")[0]
-			if fileName == op && isExecutable(fileInfo) {
-				return absPath, true
+			if fileName == op {
+				if isExecutable(fileInfo) {
+					return absPath, true
+				} else {
+					break
+				}
 			}
 		}
 	}
