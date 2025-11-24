@@ -88,22 +88,13 @@ func isPathCommand(op string) (string, bool) {
 	dirs := strings.Split(path, string(os.PathListSeparator))
 
 	for _, dir := range dirs {
-		files, err := os.ReadDir(dir)
-		if err != nil {
-			// log.Printf("broken dir: %s", err)
-			continue
-		}
 
-		for _, file := range files {
-			absPath := dir + string(os.PathSeparator) + file.Name()
-			fileInfo, _ := file.Info()
-			fileName := strings.Split(fileInfo.Name(), ".")[0]
-			if fileName == op {
-				if isExecutable(fileInfo) {
-					return absPath, true
-				} else {
-					break
-				}
+		fullPath := filepath.Join(dir, op)
+		if fileInfo, err := os.Stat(fullPath); err == nil {
+			if !fileInfo.IsDir() && isExecutable(fileInfo) {
+				return fullPath, true
+			} else {
+				continue
 			}
 		}
 	}
