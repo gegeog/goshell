@@ -44,14 +44,16 @@ func main() {
 				fmt.Println(argv[0] + ": not found")
 			}
 		default:
-			if _, ok := isPathCommand(op); ok {
-				cmd := exec.Command(op, argv...)
-				out, err := cmd.Output()
-				if err != nil {
-					fmt.Println(op + ": command not found")
-				}
-				fmt.Println(string(out))
+			if _, ok := isPathCommand(op); !ok {
+				fmt.Println(op + ": command not found")
 			}
+
+			cmd := exec.Command(op, argv...)
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				break
+			}
+			fmt.Println(string(out))
 		}
 	}
 }
