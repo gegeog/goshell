@@ -50,7 +50,7 @@ func main() {
 				cmd := exec.Command(op, argv...)
 				out, err := cmd.CombinedOutput()
 				if err == nil {
-					fmt.Println(string(out))
+					fmt.Print(string(out))
 				}
 			}
 		}
