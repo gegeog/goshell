@@ -75,7 +75,14 @@ func processCd(args ...string) {
 	ap := args[0]
 
 	if len(ap) == 0 {
+		fmt.Println("return due to 0 length")
 		return
+	}
+
+	if ap == "~" {
+		if home, err := os.UserHomeDir(); err == nil {
+			ap = home
+		}
 	}
 
 	fi, err := os.Stat(ap)
