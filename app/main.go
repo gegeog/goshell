@@ -16,6 +16,7 @@ const (
 	Echo = "echo"
 	Type = "type"
 	Pwd  = "pwd"
+	Cd   = "cd"
 )
 
 func main() {
@@ -37,18 +38,11 @@ func main() {
 		case Echo:
 			fmt.Println(strings.Join(argv, " "))
 		case Type:
-			if isBuiltinOp(argv[0]) {
-				fmt.Printf("%s is a shell builtin\n", argv[0])
-			} else if path, ok := isPathCommand(argv[0]); ok {
-				fmt.Printf("%s is %s\n", argv[0], path)
-			} else {
-				fmt.Println(argv[0] + ": not found")
-			}
+			processType(argv...)
 		case Pwd:
-			p, _ := os.Getwd()
-			if err == nil {
-				fmt.Println(p)
-			}
+			processPwd()
+		case Cd:
+			processCd(argv...)
 		default:
 			if _, ok := isPathCommand(op); !ok {
 				fmt.Println(op + ": command not found")
@@ -63,9 +57,50 @@ func main() {
 	}
 }
 
+func processType(args ...string) {
+	if isBuiltinOp(args[0]) {
+		fmt.Printf("%s is a shell builtin\n", args[0])
+	} else if path, ok := isPathCommand(args[0]); ok {
+		fmt.Printf("%s is %s\n", args[0], path)
+	} else {
+		fmt.Println(args[0] + ": not found")
+	}
+}
+
+func processCd(args ...string) {
+	if len(args) == 0 {
+		return
+	}
+
+	ap := args[0]
+
+	if len(ap) == 0 {
+		return
+	}
+
+	fi, err := os.Stat(ap)
+	if err != nil {
+		fmt.Printf("cd: %s: No such file or directory\n", ap)
+		return
+	}
+
+	if !fi.IsDir() {
+		return
+	}
+
+	if err := os.Chdir(ap); err != nil {
+		return
+	}
+}
+
+func processPwd() {
+	p, _ := os.Getwd()
+	fmt.Println(p)
+}
+
 func isBuiltinOp(op string) bool {
 	switch op {
-	case Type, Exit, Echo, Pwd:
+	case Type, Exit, Echo, Pwd, Cd:
 		return true
 	}
 
