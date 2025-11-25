@@ -78,7 +78,6 @@ func isExecutable(info fs.FileInfo) bool {
 		ext := strings.ToLower(filepath.Ext(info.Name()))
 		switch ext {
 		case ".exe", ".bat", ".cmd", ".ps1":
-			fmt.Println("TRUE")
 			return true
 		default:
 			return false
@@ -93,8 +92,6 @@ func isExecutable(info fs.FileInfo) bool {
 func isPathCommand(op string) (string, bool) {
 	path := os.Getenv("PATH")
 	dirs := strings.Split(path, string(os.PathListSeparator))
-
-	fmt.Println(dirs)
 
 	for _, dir := range dirs {
 
