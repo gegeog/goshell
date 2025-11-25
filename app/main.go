@@ -15,6 +15,7 @@ const (
 	Exit = "exit"
 	Echo = "echo"
 	Type = "type"
+	Pwd  = "pwd"
 )
 
 func main() {
@@ -43,6 +44,11 @@ func main() {
 			} else {
 				fmt.Println(argv[0] + ": not found")
 			}
+		case Pwd:
+			p, _ := os.Getwd()
+			if err == nil {
+				fmt.Println(p)
+			}
 		default:
 			if _, ok := isPathCommand(op); !ok {
 				fmt.Println(op + ": command not found")
@@ -59,7 +65,7 @@ func main() {
 
 func isBuiltinOp(op string) bool {
 	switch op {
-	case Type, Exit, Echo:
+	case Type, Exit, Echo, Pwd:
 		return true
 	}
 
@@ -72,6 +78,7 @@ func isExecutable(info fs.FileInfo) bool {
 		ext := strings.ToLower(filepath.Ext(info.Name()))
 		switch ext {
 		case ".exe", ".bat", ".cmd", ".ps1":
+			fmt.Println("TRUE")
 			return true
 		default:
 			return false
@@ -86,6 +93,8 @@ func isExecutable(info fs.FileInfo) bool {
 func isPathCommand(op string) (string, bool) {
 	path := os.Getenv("PATH")
 	dirs := strings.Split(path, string(os.PathListSeparator))
+
+	fmt.Println(dirs)
 
 	for _, dir := range dirs {
 
