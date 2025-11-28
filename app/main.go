@@ -15,6 +15,7 @@ func main() {
 	r.Handle(command.CmdType, handlers.TypeHandler{})
 	r.Handle(command.CmdPwd, handlers.PwdHandler{})
 	r.Handle(command.CmdCd, handlers.CdHandler{})
+	r.Handle(command.CmdEcho, handlers.EchoHandler{})
 
 	if err := shell.ListenAndServe(r); err != nil {
 		// log.Fatal(err)

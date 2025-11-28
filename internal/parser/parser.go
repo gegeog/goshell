@@ -16,22 +16,17 @@ func Parse(input string) (string, string) {
 		return sep[0], ""
 	}
 
-	return sep[0], validate(sep[1])
+	return sep[0], sep[1]
 }
 
-func validate(s string) string {
+func ParseQuotes(s string) string {
 	var b strings.Builder
 	var quoted bool
 
 	for i := 0; i < len(s); i++ {
 		sym := s[i]
 		if sym == '\'' {
-			if quoted {
-				quoted = false
-			} else {
-				quoted = true
-			}
-
+			quoted = !quoted
 			continue
 		}
 
@@ -44,7 +39,7 @@ func validate(s string) string {
 			if i-1 >= 0 && s[i-1] != ' ' {
 				b.WriteByte(sym)
 			}
-			
+
 			continue
 		}
 
