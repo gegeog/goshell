@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/codecrafters-io/shell-starter-go/internal/handlers"
 	"github.com/codecrafters-io/shell-starter-go/internal/parser"
@@ -17,7 +18,7 @@ func ListenAndServe(r router.Router) error {
 		fmt.Fprint(os.Stdout, "$ ")
 		command, err := reader.ReadString('\n')
 		if err != nil {
-			return errors.New(fmt.Sprintf("Error reading input: %v", err))
+			return errors.New(fmt.Sprintf("Error reading input: %v\n", err))
 		}
 
 		op, argv := parser.Parse(command)
@@ -37,7 +38,7 @@ func ListenAndServe(r router.Router) error {
 			writeLine(err.Error())
 			continue
 		}
-		
+
 		if errors.Is(err, handlers.ErrNotFound) {
 			writeLine(err.Error())
 			continue
@@ -56,5 +57,5 @@ func writeLine(s string) {
 		return
 	}
 
-	fmt.Fprintln(os.Stdout, s)
+	fmt.Fprintln(os.Stdout, strings.TrimRight(s, "\n"))
 }
