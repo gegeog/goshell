@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/codecrafters-io/shell-starter-go/internal/command"
+	"github.com/codecrafters-io/shell-starter-go/internal/parser"
 )
 
 var ErrCommandNotFound = errors.New("command not found")
@@ -26,11 +27,12 @@ func (eh ExternalHandler) Run(context string) (string, error) {
 		return "", fmt.Errorf("%s: %w", eh.op, ErrCommandNotFound)
 	}
 
-	cmd := exec.Command(eh.op, context)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("%s %w: %v", eh.op, ErrExecutionWentWrong, err)
-	}
+	fmt.Println(parser.EchoParse(context))
+	cmd := exec.Command(eh.op, parser.ArgsParse(context)...)
+	out, _ := cmd.CombinedOutput()
+	//if err != nil {
+	//	return "", fmt.Errorf("%s %w: %v, %s", eh.op, ErrExecutionWentWrong, err, out)
+	//}
 
 	return string(out), nil
 }

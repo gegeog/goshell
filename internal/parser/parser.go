@@ -19,7 +19,7 @@ func Parse(input string) (string, string) {
 	return sep[0], sep[1]
 }
 
-func ParseQuotes(s string) string {
+func EchoParse(s string) string {
 	var b strings.Builder
 	var quoted bool
 
@@ -47,4 +47,20 @@ func ParseQuotes(s string) string {
 	}
 
 	return b.String()
+}
+
+func ArgsParse(s string) []string {
+	args := strings.Split(s, "'")
+	return filterEmpty(args)
+}
+
+func filterEmpty(s []string) []string {
+	var res []string
+	for _, v := range s {
+		if len(strings.TrimSpace(v)) > 0 {
+			res = append(res, v)
+		}
+	}
+
+	return res
 }
