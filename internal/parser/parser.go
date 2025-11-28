@@ -50,17 +50,41 @@ func EchoParse(s string) string {
 }
 
 func ArgsParse(s string) []string {
-	args := strings.Split(s, "'")
-	return filterEmpty(args)
-}
+	var quoted bool
+	var prevQuote int
 
-func filterEmpty(s []string) []string {
 	var res []string
-	for _, v := range s {
-		if len(strings.TrimSpace(v)) > 0 {
-			res = append(res, v)
+
+	for i, v := range s {
+		if string(v) == "'" {
+			if quoted {
+				res = append(res, s[prevQuote:i])
+			} else {
+				res = append(res, filterSpaces(s[prevQuote:i])...)
+			}
+
+			prevQuote = i + 1
+			quoted = !quoted
 		}
 	}
 
 	return res
 }
+
+func filterSpaces(s string) []string {
+	var res []string
+	var sl = strings.Split(s, " ")
+
+	for _, v := range sl {
+		if trimmed := strings.TrimSpace(v); len(trimmed) > 0 {
+			res = append(res, trimmed)
+		}
+	}
+
+	return res
+}
+
+/**
+добавляю всё что до кавычки, там может быть ничего, а может быть дохуя всего разделенного пробелами.
+для того чтобы узнать что там -- разбиваю по пробелам, но может быть такая хуйня, что появляется куча пустых строк
+*/
