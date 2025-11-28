@@ -1,0 +1,60 @@
+package shell
+
+import (
+	"bufio"
+	"errors"
+	"fmt"
+	"os"
+
+	"github.com/codecrafters-io/shell-starter-go/internal/handlers"
+	"github.com/codecrafters-io/shell-starter-go/internal/parser"
+	"github.com/codecrafters-io/shell-starter-go/internal/router"
+)
+
+func ListenAndServe(r router.Router) error {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Fprint(os.Stdout, "$ ")
+		command, err := reader.ReadString('\n')
+		if err != nil {
+			return errors.New(fmt.Sprintf("Error reading input: %v", err))
+		}
+
+		op, argv := parser.Parse(command)
+
+		if op == "" {
+			continue
+		}
+
+		out, err := r.Run(op, argv)
+
+		if errors.Is(err, handlers.ErrNoSuchFileOrDirectory) {
+			writeLine(err.Error())
+			continue
+		}
+
+		if errors.Is(err, handlers.ErrCommandNotFound) {
+			writeLine(err.Error())
+			continue
+		}
+		
+		if errors.Is(err, handlers.ErrNotFound) {
+			writeLine(err.Error())
+			continue
+		}
+
+		if errors.Is(err, handlers.ErrShellExit) {
+			return err
+		}
+
+		writeLine(out)
+	}
+}
+
+func writeLine(s string) {
+	if s == "" {
+		return
+	}
+
+	fmt.Fprintln(os.Stdout, s)
+}
