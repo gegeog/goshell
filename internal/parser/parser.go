@@ -91,9 +91,11 @@ func ArgsParse(s string) []string {
 		prev = sym
 	}
 
-	res = append(res, b.String())
+	if res == nil && b.String() == "" {
+		return res
+	}
 
-	return res
+	return append(res, b.String())
 }
 
 func filterSpaces(s string) []string {
