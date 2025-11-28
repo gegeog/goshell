@@ -50,23 +50,48 @@ func EchoParse(s string) string {
 }
 
 func ArgsParse(s string) []string {
+	s = strings.TrimSpace(s)
+
 	var quoted bool
-	var prevQuote int
+	var prev string
 
 	var res []string
+	var b strings.Builder
 
-	for i, v := range s {
-		if string(v) == "'" {
-			if quoted {
-				res = append(res, s[prevQuote:i])
-			} else {
-				res = append(res, filterSpaces(s[prevQuote:i])...)
-			}
+	for _, v := range s {
+		sym := string(v)
 
-			prevQuote = i + 1
-			quoted = !quoted
+		if quoted && sym != "'" {
+			b.WriteString(sym)
+			continue
 		}
+
+		if quoted {
+			quoted = false
+			res = append(res, b.String())
+			b.Reset()
+			continue
+		}
+
+		if sym == "'" {
+			quoted = true
+			res = append(res, filterSpaces(b.String())...)
+			b.Reset()
+			continue
+		}
+
+		if sym == " " && prev != " " {
+			res = append(res, filterSpaces(b.String())...)
+			b.Reset()
+			prev = sym
+			continue
+		}
+
+		b.WriteString(sym)
+		prev = sym
 	}
+
+	res = append(res, b.String())
 
 	return res
 }
@@ -83,8 +108,3 @@ func filterSpaces(s string) []string {
 
 	return res
 }
-
-/**
-добавляю всё что до кавычки, там может быть ничего, а может быть дохуя всего разделенного пробелами.
-для того чтобы узнать что там -- разбиваю по пробелам, но может быть такая хуйня, что появляется куча пустых строк
-*/

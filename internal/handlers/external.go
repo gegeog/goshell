@@ -27,6 +27,7 @@ func (eh ExternalHandler) Run(context string) (string, error) {
 		return "", fmt.Errorf("%s: %w", eh.op, ErrCommandNotFound)
 	}
 
+	fmt.Println(parser.ArgsParse(context))
 	cmd := exec.Command(eh.op, parser.ArgsParse(context)...)
 	out, _ := cmd.CombinedOutput()
 	//if err != nil {
