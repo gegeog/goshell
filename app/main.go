@@ -19,6 +19,6 @@ func main() {
 
 	if err := shell.ListenAndServe(r); err != nil {
 		// log.Fatal(err)
-		os.Exit(1)
+		os.Exit(0)
 	}
 }
