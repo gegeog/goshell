@@ -23,30 +23,32 @@ func validate(s string) string {
 	var b strings.Builder
 	var quoted bool
 
-	for i, v := range s {
-		if string(v) == "'" {
+	for i := 0; i < len(s); i++ {
+		sym := s[i]
+		if sym == '\'' {
 			if quoted {
 				quoted = false
-				continue
+			} else {
+				quoted = true
 			}
 
-			quoted = true
 			continue
 		}
 
 		if quoted {
-			b.WriteRune(v)
+			b.WriteByte(sym)
 			continue
 		}
 
-		if string(v) == " " {
-			if i-1 >= 0 {
-				b.WriteRune(v)
-				continue
+		if sym == ' ' {
+			if i-1 >= 0 && s[i-1] != ' ' {
+				b.WriteByte(sym)
 			}
+			
+			continue
 		}
 
-		b.WriteRune(v)
+		b.WriteByte(sym)
 	}
 
 	return b.String()
