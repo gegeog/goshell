@@ -14,18 +14,18 @@ var ErrNoSuchFileOrDirectory = errors.New("No such file or directory")
 
 type CdHandler struct{}
 
-func (ch CdHandler) Run(path string) (string, error) {
-	if len(path) == 0 {
-		return "", nil
-	}
+func (ch CdHandler) Run(args []string) (string, error) {
+	var path string
 
-	if path == "~" {
+	if len(args) == 0 || args[0] == "~" {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", ErrUnableOpenHomeDirectory
 		}
 
 		path = home
+	} else {
+		path = args[0]
 	}
 
 	fi, err := os.Stat(path)

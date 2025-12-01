@@ -1,9 +1,11 @@
 package handlers
 
-import "github.com/codecrafters-io/shell-starter-go/internal/parser"
+import (
+	"strings"
+)
 
 type EchoHandler struct{}
 
-func (eh EchoHandler) Run(s string) (string, error) {
-	return parser.EchoParse(s), nil
+func (eh EchoHandler) Run(args []string) (string, error) {
+	return strings.Join(args, " "), nil
 }
