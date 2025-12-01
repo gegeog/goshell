@@ -28,7 +28,7 @@ func argsParse(s string) []string {
 	var b strings.Builder
 
 	for _, v := range s {
-		if v == '\'' {
+		if v == '"' {
 			isQuoted = !isQuoted
 			continue
 		}
