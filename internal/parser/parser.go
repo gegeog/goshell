@@ -19,17 +19,34 @@ func Parse(input string) (string, []string) {
 	return sep[0], argsParse(sep[1])
 }
 
+func isQuote(char rune) bool {
+	if char == '"' || char == '\'' {
+		return true
+	}
+
+	return false
+}
+
 func argsParse(s string) []string {
 	s = strings.TrimSpace(s)
 
+	var currentQuote rune
 	var isQuoted bool
 
 	var result []string
 	var b strings.Builder
 
+	// 'asdfadsfa""'
 	for _, v := range s {
-		if v == '"' {
-			isQuoted = !isQuoted
+		if isQuote(v) && currentQuote == 0 {
+			currentQuote = v
+			isQuoted = true
+			continue
+		}
+
+		if isQuote(v) && v == currentQuote {
+			currentQuote = 0
+			isQuoted = false
 			continue
 		}
 
