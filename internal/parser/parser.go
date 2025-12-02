@@ -46,11 +46,9 @@ func argsParse(s string) []string {
 
 	for i := 0; i < len(s); i++ {
 		if s[i] == '\\' {
-			if !isQuote(s[i+1]) {
-				b.WriteByte(s[i+1])
-				i++
-				continue
-			}
+			b.WriteByte(s[i+1])
+			i++
+			continue
 		}
 
 		if isQuote(s[i]) && currentQuote == 0 {
