@@ -45,30 +45,25 @@ func argsParse(s string) []string {
 	var b strings.Builder
 
 	for i := 0; i < len(s); i++ {
-
-		currentSymbol := s[i]
-
-		if currentSymbol == '\\' {
-			if isSpecialChar(s[i+1]) {
-				currentSymbol = s[i+1]
-			} else {
+		if s[i] == '\\' {
+			if !isQuote(s[i+1]) {
 				b.WriteByte(s[i+1])
 				i++
 				continue
 			}
 		}
 
-		if isQuote(currentSymbol) && currentQuote == 0 {
-			currentQuote = currentSymbol
+		if isQuote(s[i]) && currentQuote == 0 {
+			currentQuote = s[i]
 			continue
 		}
 
-		if isQuote(currentSymbol) && currentQuote == currentSymbol {
+		if isQuote(s[i]) && currentQuote == s[i] {
 			currentQuote = 0
 			continue
 		}
 
-		if currentSymbol == ' ' && currentQuote == 0 {
+		if s[i] == ' ' && currentQuote == 0 {
 			if b.Len() > 0 {
 				result = append(result, b.String())
 				b.Reset()
@@ -76,7 +71,7 @@ func argsParse(s string) []string {
 			continue
 		}
 
-		b.WriteByte(currentSymbol)
+		b.WriteByte(s[i])
 	}
 
 	if b.Len() > 0 {
