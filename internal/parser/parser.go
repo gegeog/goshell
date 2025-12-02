@@ -45,12 +45,6 @@ func argsParse(s string) []string {
 	var b strings.Builder
 
 	for i := 0; i < len(s); i++ {
-		if s[i] == '\\' {
-			b.WriteByte(s[i+1])
-			i++
-			continue
-		}
-
 		if isQuote(s[i]) && currentQuote == 0 {
 			currentQuote = s[i]
 			continue
@@ -58,6 +52,12 @@ func argsParse(s string) []string {
 
 		if isQuote(s[i]) && currentQuote == s[i] {
 			currentQuote = 0
+			continue
+		}
+
+		if currentQuote == 0 && s[i] == '\\' {
+			b.WriteByte(s[i+1])
+			i++
 			continue
 		}
 
