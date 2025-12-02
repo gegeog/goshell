@@ -19,8 +19,17 @@ func Parse(input string) (string, []string) {
 	return sep[0], argsParse(sep[1])
 }
 
-func isQuote(char rune) bool {
+func isQuote(char byte) bool {
 	if char == '"' || char == '\'' {
+		return true
+	}
+
+	return false
+}
+
+func isSpecialChar(char byte) bool {
+	switch char {
+	case ' ', '\'', '"', '$', '*', '?', 'n', 't':
 		return true
 	}
 
@@ -30,27 +39,29 @@ func isQuote(char rune) bool {
 func argsParse(s string) []string {
 	s = strings.TrimSpace(s)
 
-	var currentQuote rune
-	var isQuoted bool
+	var currentQuote byte
 
 	var result []string
 	var b strings.Builder
 
-	// 'asdfadsfa""'
-	for _, v := range s {
-		if isQuote(v) && currentQuote == 0 {
-			currentQuote = v
-			isQuoted = true
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\\' {
+			b.WriteByte(s[i+1])
+			i++
 			continue
 		}
 
-		if isQuote(v) && v == currentQuote {
+		if isQuote(s[i]) && currentQuote == 0 {
+			currentQuote = s[i]
+			continue
+		}
+
+		if isQuote(s[i]) && currentQuote == s[i] {
 			currentQuote = 0
-			isQuoted = false
 			continue
 		}
 
-		if v == ' ' && !isQuoted {
+		if s[i] == ' ' && currentQuote == 0 {
 			if b.Len() > 0 {
 				result = append(result, b.String())
 				b.Reset()
@@ -58,7 +69,7 @@ func argsParse(s string) []string {
 			continue
 		}
 
-		b.WriteRune(v)
+		b.WriteByte(s[i])
 	}
 
 	if b.Len() > 0 {
