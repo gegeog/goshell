@@ -6,7 +6,16 @@ import (
 
 func Parse(input string) (string, []string) {
 	input = strings.TrimSpace(input)
-	sep := strings.SplitN(input, " ", 2)
+	if len(input) == 0 {
+		return "", nil
+	}
+
+	var sep []string
+	if isQuote(input[0]) {
+		sep = argsParse(input)
+	} else {
+		sep = strings.SplitN(input, " ", 2)
+	}
 
 	if len(sep) == 0 {
 		return "", nil
@@ -14,6 +23,10 @@ func Parse(input string) (string, []string) {
 
 	if len(sep) == 1 {
 		return sep[0], nil
+	}
+
+	if isQuote(input[0]) {
+		return sep[0], sep[1:]
 	}
 
 	return sep[0], argsParse(sep[1])
