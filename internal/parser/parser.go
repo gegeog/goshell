@@ -29,7 +29,7 @@ func isQuote(char byte) bool {
 
 func isSpecialChar(char byte) bool {
 	switch char {
-	case ' ', '\'', '"', '$', '*', '?', 'n', 't':
+	case '"', '\\': /* ' ', '\'', '"', '$', '*', '?', 'n', 't':*/
 		return true
 	}
 
@@ -59,6 +59,19 @@ func argsParse(s string) []string {
 			b.WriteByte(s[i+1])
 			i++
 			continue
+		}
+
+		if currentQuote == '"' && s[i] == '\\' {
+			nextIndex := i + 1
+			if nextIndex > len(s)-1 {
+				break
+			}
+
+			if isSpecialChar(s[i]) {
+				b.WriteByte(s[i])
+				i++
+				continue
+			}
 		}
 
 		if s[i] == ' ' && currentQuote == 0 {
