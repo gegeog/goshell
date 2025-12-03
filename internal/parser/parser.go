@@ -67,8 +67,8 @@ func argsParse(s string) []string {
 				break
 			}
 
-			if isSpecialChar(s[i]) {
-				b.WriteByte(s[i])
+			if isSpecialChar(s[nextIndex]) {
+				b.WriteByte(s[nextIndex])
 				i++
 				continue
 			}
