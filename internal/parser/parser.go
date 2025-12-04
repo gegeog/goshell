@@ -4,32 +4,30 @@ import (
 	"strings"
 )
 
-func Parse(input string) (string, []string) {
+func Parse(input string) (string, []string, string) {
 	input = strings.TrimSpace(input)
 	if len(input) == 0 {
-		return "", nil
+		return "", nil, ""
 	}
 
 	var sep []string
+	var output string
 	if isQuote(input[0]) {
-		sep = argsParse(input)
+		sep, output = argsParse(input)
 	} else {
 		sep = strings.SplitN(input, " ", 2)
 	}
 
-	if len(sep) == 0 {
-		return "", nil
-	}
-
 	if len(sep) == 1 {
-		return sep[0], nil
+		return sep[0], nil, ""
 	}
 
 	if isQuote(input[0]) {
-		return sep[0], sep[1:]
+		return sep[0], sep[1:], output
 	}
 
-	return sep[0], argsParse(sep[1])
+	arguments, output := argsParse(sep[1])
+	return sep[0], arguments, output
 }
 
 func isQuote(char byte) bool {
@@ -42,17 +40,21 @@ func isQuote(char byte) bool {
 
 func isSpecialChar(char byte) bool {
 	switch char {
-	case '"', '\\': /* ' ', '\'', '"', '$', '*', '?', 'n', 't':*/
+	case '"', '\\':
 		return true
 	}
 
 	return false
 }
 
-func argsParse(s string) []string {
+func argsParse(s string) ([]string, string) {
 	s = strings.TrimSpace(s)
 
 	var currentQuote byte
+
+	var isReadingRedirect bool
+	var output string
+	var lastChar byte
 
 	var result []string
 	var b strings.Builder
@@ -67,6 +69,37 @@ func argsParse(s string) []string {
 			currentQuote = 0
 			continue
 		}
+
+		//READING REDIRECT...
+		if currentQuote == 0 && s[i] == '>' {
+			if b.Len() > 0 {
+				if s[i-1] == '1' {
+					result = append(result, b.String()[:len(b.String())])
+				} else {
+					result = append(result, b.String())
+				}
+				b.Reset()
+			}
+
+			isReadingRedirect = true
+			continue
+		}
+
+		if isReadingRedirect && s[i] == ' ' && lastChar != 0 {
+			output = b.String()
+			b.Reset()
+			isReadingRedirect = false
+			continue
+		}
+
+		if isReadingRedirect {
+			if s[i] != ' ' {
+				lastChar = s[i]
+				b.WriteByte(s[i])
+			}
+			continue
+		}
+		//...READING REDIRECT
 
 		if currentQuote == 0 && s[i] == '\\' {
 			b.WriteByte(s[i+1])
@@ -99,8 +132,12 @@ func argsParse(s string) []string {
 	}
 
 	if b.Len() > 0 {
-		result = append(result, b.String())
+		if isReadingRedirect {
+			output = b.String()
+		} else {
+			result = append(result, b.String())
+		}
 	}
 
-	return result
+	return result, output
 }

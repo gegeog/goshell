@@ -21,7 +21,7 @@ func ListenAndServe(r router.Router) error {
 			return errors.New(fmt.Sprintf("Error reading input: %v\n", err))
 		}
 
-		op, argv := parser.Parse(command)
+		op, argv, output := parser.Parse(command)
 
 		if op == "" {
 			continue
@@ -30,17 +30,17 @@ func ListenAndServe(r router.Router) error {
 		out, err := r.Run(op, argv)
 
 		if errors.Is(err, handlers.ErrNoSuchFileOrDirectory) {
-			writeLine(err.Error())
+			writeLine(err.Error(), "")
 			continue
 		}
 
 		if errors.Is(err, handlers.ErrCommandNotFound) {
-			writeLine(err.Error())
+			writeLine(err.Error(), "")
 			continue
 		}
 
 		if errors.Is(err, handlers.ErrNotFound) {
-			writeLine(err.Error())
+			writeLine(err.Error(), "")
 			continue
 		}
 
@@ -48,14 +48,18 @@ func ListenAndServe(r router.Router) error {
 			return err
 		}
 
-		writeLine(out)
+		writeLine(out, output)
 	}
 }
 
-func writeLine(s string) {
+func writeLine(s string, output string) {
 	if s == "" {
 		return
 	}
 
-	fmt.Fprintln(os.Stdout, strings.TrimRight(s, "\n"))
+	if output != "" {
+		_ = os.WriteFile(output, []byte(s), 0644)
+	} else {
+		fmt.Fprintln(os.Stdout, strings.TrimRight(s, "\n"))
+	}
 }
