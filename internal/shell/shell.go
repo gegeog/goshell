@@ -56,6 +56,8 @@ func ListenAndServe(r router.Router) error {
 		if redirectMode == parser.ErrorRedirect {
 			writeLine(out, "")
 			writeLine(err.Error(), output)
+		} else {
+			writeLine(out, "")
 		}
 	}
 }
