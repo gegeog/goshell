@@ -48,6 +48,11 @@ func ListenAndServe(r router.Router) error {
 			return err
 		}
 
+		if errors.Is(err, handlers.ErrExecutionWentWrong) {
+			writeLine(out, "")
+			continue
+		}
+
 		writeLine(out, output)
 	}
 }

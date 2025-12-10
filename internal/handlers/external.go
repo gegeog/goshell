@@ -28,8 +28,9 @@ func (eh ExternalHandler) Run(context []string) (string, error) {
 
 	cmd := exec.Command(eh.op, context...)
 	out, err := cmd.CombinedOutput()
+
 	if err != nil {
-		return "", fmt.Errorf("%s %w: %v, %s", eh.op, ErrExecutionWentWrong, err, out)
+		return string(out), fmt.Errorf("%s %w: %v, %s", eh.op, ErrExecutionWentWrong, err, out)
 	}
 
 	return string(out), nil
