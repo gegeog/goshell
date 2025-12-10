@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"os"
 	"os/exec"
 
 	"github.com/codecrafters-io/shell-starter-go/internal/command"
@@ -27,12 +27,14 @@ func (eh ExternalHandler) Run(context []string) (string, error) {
 		return "", fmt.Errorf("%s: %w", eh.op, ErrCommandNotFound)
 	}
 
+	var buf bytes.Buffer
+
 	cmd := exec.Command(eh.op, context...)
-	cmd.Stderr = os.Stdout
+	cmd.Stderr = &buf
 	out, err := cmd.Output()
 
-	if err != nil {
-		return string(out), err
+	if err != nil && buf.Len() > 0 {
+		return string(out), fmt.Errorf(buf.String())
 	}
 
 	return string(out), nil

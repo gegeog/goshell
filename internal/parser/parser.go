@@ -1,33 +1,39 @@
 package parser
 
 import (
+	"strconv"
 	"strings"
 )
 
-func Parse(input string) (string, []string, string) {
+const (
+	OutputRedirect = 1
+	ErrorRedirect  = 2
+)
+
+func Parse(input string) (string, []string, string, int) {
 	input = strings.TrimSpace(input)
 	if len(input) == 0 {
-		return "", nil, ""
+		return "", nil, "", 0
 	}
 
 	var sep []string
 	var output string
 	if isQuote(input[0]) {
-		sep, output = argsParse(input)
+		sep, output, _ = argsParse(input)
 	} else {
 		sep = strings.SplitN(input, " ", 2)
 	}
 
 	if len(sep) == 1 {
-		return sep[0], nil, ""
+		return sep[0], nil, "", 0
 	}
 
 	if isQuote(input[0]) {
-		return sep[0], sep[1:], output
+		return sep[0], sep[1:], output, 0
 	}
 
-	arguments, output := argsParse(sep[1])
-	return sep[0], arguments, output
+	arguments, output, redirectMode := argsParse(sep[1])
+	return sep[0], arguments, output, redirectMode
 }
 
 func isQuote(char byte) bool {
@@ -47,12 +53,14 @@ func isSpecialChar(char byte) bool {
 	return false
 }
 
-func argsParse(s string) ([]string, string) {
+func argsParse(s string) ([]string, string, int) {
 	s = strings.TrimSpace(s)
 
 	var currentQuote byte
 
 	var isReadingRedirect bool
+	var redirectMode int
+
 	var output string
 	var lastChar byte
 
@@ -72,7 +80,8 @@ func argsParse(s string) ([]string, string) {
 
 		if currentQuote == 0 && s[i] == '>' {
 			if b.Len() > 0 {
-				if s[i-1] == '1' {
+				if s[i-1] == '1' || s[i-1] == '2' {
+					redirectMode, _ = strconv.Atoi(string(s[i-1]))
 					if b.Len() > 1 {
 						result = append(result, b.String()[:len(b.String())-1])
 					}
@@ -139,5 +148,5 @@ func argsParse(s string) ([]string, string) {
 		}
 	}
 
-	return result, output
+	return result, output, redirectMode
 }

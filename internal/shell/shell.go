@@ -21,7 +21,7 @@ func ListenAndServe(r router.Router) error {
 			return errors.New(fmt.Sprintf("Error reading input: %v\n", err))
 		}
 
-		op, argv, output := parser.Parse(command)
+		op, argv, output, redirectMode := parser.Parse(command)
 
 		if op == "" {
 			continue
@@ -53,7 +53,10 @@ func ListenAndServe(r router.Router) error {
 			continue
 		}
 
-		writeLine(out, output)
+		if redirectMode == parser.ErrorRedirect {
+			writeLine(out, "")
+			writeLine(err.Error(), output)
+		}
 	}
 }
 
