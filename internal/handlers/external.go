@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 
 	"github.com/codecrafters-io/shell-starter-go/internal/command"
@@ -27,10 +28,11 @@ func (eh ExternalHandler) Run(context []string) (string, error) {
 	}
 
 	cmd := exec.Command(eh.op, context...)
-	out, err := cmd.CombinedOutput()
+	cmd.Stderr = os.Stdout
+	out, err := cmd.Output()
 
 	if err != nil {
-		return string(out), fmt.Errorf("%s %w: %v, %s", eh.op, ErrExecutionWentWrong, err, out)
+		return string(out), err
 	}
 
 	return string(out), nil

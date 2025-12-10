@@ -70,11 +70,12 @@ func argsParse(s string) ([]string, string) {
 			continue
 		}
 
-		//READING REDIRECT...
 		if currentQuote == 0 && s[i] == '>' {
 			if b.Len() > 0 {
 				if s[i-1] == '1' {
-					result = append(result, b.String()[:len(b.String())-1])
+					if b.Len() > 1 {
+						result = append(result, b.String()[:len(b.String())-1])
+					}
 				} else {
 					result = append(result, b.String())
 				}
@@ -99,7 +100,6 @@ func argsParse(s string) ([]string, string) {
 			}
 			continue
 		}
-		//...READING REDIRECT
 
 		if currentQuote == 0 && s[i] == '\\' {
 			b.WriteByte(s[i+1])
