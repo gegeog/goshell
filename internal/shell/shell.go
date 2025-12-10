@@ -53,7 +53,7 @@ func ListenAndServe(r router.Router) error {
 			continue
 		}
 
-		if redirectMode == parser.ErrorRedirect {
+		if redirectMode == parser.ErrorRedirect && err != nil {
 			writeLine(out, "")
 			writeLine(err.Error(), output)
 		} else {
@@ -62,13 +62,13 @@ func ListenAndServe(r router.Router) error {
 	}
 }
 
-func writeLine(s string, output string) {
+func writeLine(s string, outputFilePath string) {
 	if s == "" {
 		return
 	}
 
-	if output != "" {
-		_ = os.WriteFile(output, []byte(s), 0644)
+	if outputFilePath != "" {
+		_ = os.WriteFile(outputFilePath, []byte(s), 0644)
 	} else {
 		fmt.Fprintln(os.Stdout, strings.TrimRight(s, "\n"))
 	}
