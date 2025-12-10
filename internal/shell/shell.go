@@ -53,17 +53,26 @@ func ListenAndServe(r router.Router) error {
 			continue
 		}
 
-		if redirectMode == parser.ErrorRedirect && err != nil {
-			writeLine(out, "")
+		writeLine(out, "")
+
+		if redirectMode == parser.ErrorRedirect {
+			if err == nil {
+				writeLine("", output)
+				continue
+			}
+
 			writeLine(err.Error(), output)
-		} else {
-			writeLine(out, "")
+			continue
+		}
+
+		if err != nil {
+			writeLine(err.Error(), "")
 		}
 	}
 }
 
 func writeLine(s string, outputFilePath string) {
-	if s == "" {
+	if s == "" && outputFilePath == "" {
 		return
 	}
 
