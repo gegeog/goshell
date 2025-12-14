@@ -84,18 +84,18 @@ func writeError(err error, info parser.ParsedInfo) {
 	var msg string
 
 	if err != nil {
-		msg = err.Error()
+		msg = err.Error() + "\n"
 	}
 
 	for _, errPath := range info.ErrRedirectNew {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE, 0644)
-		_, _ = file.WriteString(msg + "\n")
+		_, _ = file.WriteString(msg)
 		_ = file.Close()
 	}
 
 	for _, errPath := range info.ErrRedirectRest {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		_, _ = file.WriteString(msg + "\n")
+		_, _ = file.WriteString(msg)
 		_ = file.Close()
 	}
 }
