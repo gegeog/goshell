@@ -69,7 +69,7 @@ func writeLine(s string, info parser.ParsedInfo) {
 
 	for _, outPath := range info.OutputRedirectsNew {
 		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE, 0644)
-		_, _ = file.WriteString(s)
+		_, _ = file.WriteString(s + "\n")
 		_ = file.Close()
 	}
 
@@ -89,13 +89,13 @@ func writeError(err error, info parser.ParsedInfo) {
 
 	for _, errPath := range info.ErrRedirectNew {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE, 0644)
-		_, _ = file.WriteString(msg)
+		_, _ = file.WriteString(msg + "\n")
 		_ = file.Close()
 	}
 
 	for _, errPath := range info.ErrRedirectRest {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		_, _ = file.WriteString(msg)
+		_, _ = file.WriteString(msg + "\n")
 		_ = file.Close()
 	}
 }
