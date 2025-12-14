@@ -98,4 +98,8 @@ func writeError(err error, info parser.ParsedInfo) {
 		_, _ = file.WriteString(msg)
 		_ = file.Close()
 	}
+
+	if info.ErrRedirectRest == nil && info.ErrRedirectNew == nil {
+		fmt.Fprintln(os.Stdout, strings.TrimRight(msg, "\n"))
+	}
 }
