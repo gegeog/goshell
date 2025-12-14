@@ -69,7 +69,7 @@ func writeLine(s string, info parser.ParsedInfo) {
 
 	for _, outPath := range info.OutputRedirectsNew {
 		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE, 0644)
-		_, _ = file.WriteString(s + "\n")
+		_, _ = file.WriteString(s)
 		_ = file.Close()
 	}
 
