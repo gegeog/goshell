@@ -21,30 +21,30 @@ func ListenAndServe(r router.Router) error {
 			return errors.New(fmt.Sprintf("Error reading input: %v\n", err))
 		}
 
-		op, argv, outputPaths, errorPaths := parser.Parse(command)
+		op, parseinfo := parser.Parse(command)
 
 		if op == "" {
 			continue
 		}
 
-		out, err := r.Run(op, argv)
+		out, err := r.Run(op, parseinfo.Arguments)
 
 		if errors.Is(err, handlers.ErrShellExit) {
 			return err
 		}
 
 		if errors.Is(err, handlers.ErrNoSuchFileOrDirectory) {
-			writeLine(err.Error(), errorPaths)
+			writeError(err, parseinfo)
 			continue
 		}
 
 		if errors.Is(err, handlers.ErrCommandNotFound) {
-			writeLine(err.Error(), errorPaths)
+			writeError(err, parseinfo)
 			continue
 		}
 
 		if errors.Is(err, handlers.ErrNotFound) {
-			writeLine(err.Error(), errorPaths)
+			writeError(err, parseinfo)
 			continue
 		}
 
@@ -52,35 +52,50 @@ func ListenAndServe(r router.Router) error {
 			if no error but error output file provided
 			should create empty file
 		*/
-		if errorPaths != nil {
-			writeLine(out, outputPaths)
-			if err != nil {
-				writeLine(err.Error(), errorPaths)
-				continue
-			}
-
-			writeLine("", errorPaths)
-			continue
-		}
-
-		writeLine(out, outputPaths)
-		if err != nil {
-			writeLine(err.Error(), errorPaths)
-		}
+		writeLine(out, parseinfo)
+		writeError(err, parseinfo)
 	}
 }
 
-func writeLine(s string, filePaths []string) {
-	if s == "" && filePaths == nil {
+func writeLine(s string, info parser.ParsedInfo) {
+	if s == "" && info.OutputRedirectsRest == nil && info.OutputRedirectsNew == nil {
 		return
 	}
 
-	if filePaths == nil {
+	if info.OutputRedirectsRest == nil && info.OutputRedirectsNew == nil {
 		fmt.Fprintln(os.Stdout, strings.TrimRight(s, "\n"))
 		return
 	}
 
-	for _, v := range filePaths {
-		_ = os.WriteFile(v, []byte(s), 0644)
+	for _, outPath := range info.OutputRedirectsNew {
+		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE, 0644)
+		_, _ = file.WriteString(s)
+		_ = file.Close()
+	}
+
+	for _, outPath := range info.OutputRedirectsRest {
+		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		_, _ = file.WriteString(s + "\n")
+		_ = file.Close()
+	}
+}
+
+func writeError(err error, info parser.ParsedInfo) {
+	var msg string
+
+	if err != nil {
+		msg = err.Error()
+	}
+
+	for _, errPath := range info.ErrRedirectNew {
+		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE, 0644)
+		_, _ = file.WriteString(msg)
+		_ = file.Close()
+	}
+
+	for _, errPath := range info.ErrRedirectRest {
+		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		_, _ = file.WriteString(msg)
+		_ = file.Close()
 	}
 }

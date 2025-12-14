@@ -10,33 +10,44 @@ const (
 	ErrorRedirect  = 2
 )
 
-func Parse(input string) (string, []string, []string, []string) {
+type ParsedInfo struct {
+	Arguments           []string
+	OutputRedirectsRest []string
+	OutputRedirectsNew  []string
+	ErrRedirectRest     []string
+	ErrRedirectNew      []string
+}
+
+func Parse(input string) (string, ParsedInfo) {
 	input = strings.TrimSpace(input)
 
+	var (
+		pi            ParsedInfo
+		separatedArgs []string
+	)
+
 	if len(input) == 0 {
-		return "", nil, nil, nil
+		return "", pi
 	}
 
-	var separatedArgs []string
-	var outputRedirectPaths []string
-	var errorRedirectPaths []string
-
 	if isQuote(input[0]) {
-		separatedArgs, outputRedirectPaths, errorRedirectPaths = argsParse(input)
+		pi = argsParse(input)
 	} else {
 		separatedArgs = strings.SplitN(input, " ", 2)
 	}
 
 	if len(separatedArgs) == 1 {
-		return separatedArgs[0], nil, nil, nil
+		return separatedArgs[0], pi
 	}
 
 	if isQuote(input[0]) {
-		return separatedArgs[0], separatedArgs[1:], outputRedirectPaths, errorRedirectPaths
+		cmd := pi.Arguments[0]
+		pi.Arguments = pi.Arguments[1:]
+		return cmd, pi
 	}
 
-	arguments, outputRedirectPaths, errorRedirectPaths := argsParse(separatedArgs[1])
-	return separatedArgs[0], arguments, outputRedirectPaths, errorRedirectPaths
+	pi = argsParse(separatedArgs[1])
+	return separatedArgs[0], pi
 }
 
 func isQuote(char byte) bool {
@@ -56,16 +67,22 @@ func isSpecialChar(char byte) bool {
 	return false
 }
 
-func argsParse(s string) (args, outRedirectPaths, errRedirectPaths []string) {
+func argsParse(s string) ParsedInfo {
 	s = strings.TrimSpace(s)
 
-	var lastChar byte
-	var currentQuote byte
+	var (
+		args                                       []string
+		outRedirectPaths, errRedirectPaths         []string
+		outRedirectPathsRest, errRedirectPathsRest []string
 
-	var isReadingRedirect bool
-	var redirectMode int
+		lastChar          byte
+		currentQuote      byte
+		isReadingRedirect bool
+		isRedirectRest    bool
+		redirectMode      int
 
-	var b strings.Builder
+		b strings.Builder
+	)
 
 	for i := 0; i < len(s); i++ {
 		//QUOTES IN/OUT...
@@ -112,18 +129,33 @@ func argsParse(s string) (args, outRedirectPaths, errRedirectPaths []string) {
 			}
 
 			isReadingRedirect = true
+
+			if i+1 <= len(s)-1 && s[i+1] == '>' {
+				isRedirectRest = true
+				i++
+			}
+
 			continue
 		}
 
 		if isReadingRedirect && s[i] == ' ' && lastChar != 0 {
 			outputFilePath := b.String()
 			if redirectMode == OutputRedirect {
-				outRedirectPaths = append(outRedirectPaths, outputFilePath)
+				if !isRedirectRest {
+					outRedirectPaths = append(outRedirectPaths, outputFilePath)
+				} else {
+					outRedirectPathsRest = append(outRedirectPathsRest, outputFilePath)
+				}
 			} else {
-				errRedirectPaths = append(errRedirectPaths, outputFilePath)
+				if !isRedirectRest {
+					errRedirectPaths = append(errRedirectPaths, outputFilePath)
+				} else {
+					errRedirectPathsRest = append(errRedirectPathsRest, outputFilePath)
+				}
 			}
 			lastChar = 0
 			isReadingRedirect = false
+			isRedirectRest = false
 			b.Reset()
 			continue
 		}
@@ -164,14 +196,28 @@ func argsParse(s string) (args, outRedirectPaths, errRedirectPaths []string) {
 		if isReadingRedirect {
 			filePath := b.String()
 			if redirectMode == OutputRedirect {
-				outRedirectPaths = append(outRedirectPaths, filePath)
+				if !isRedirectRest {
+					outRedirectPaths = append(outRedirectPaths, filePath)
+				} else {
+					outRedirectPathsRest = append(outRedirectPathsRest, filePath)
+				}
 			} else {
-				errRedirectPaths = append(errRedirectPaths, filePath)
+				if !isRedirectRest {
+					errRedirectPaths = append(errRedirectPaths, filePath)
+				} else {
+					errRedirectPathsRest = append(errRedirectPathsRest, filePath)
+				}
 			}
 		} else {
 			args = append(args, b.String())
 		}
 	}
 
-	return
+	return ParsedInfo{
+		Arguments:           args,
+		OutputRedirectsNew:  outRedirectPaths,
+		OutputRedirectsRest: outRedirectPathsRest,
+		ErrRedirectNew:      errRedirectPaths,
+		ErrRedirectRest:     errRedirectPathsRest,
+	}
 }
