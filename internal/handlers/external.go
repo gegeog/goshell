@@ -10,7 +10,6 @@ import (
 )
 
 var ErrCommandNotFound = errors.New("command not found")
-var ErrExecutionWentWrong = errors.New("execution went wrong")
 
 type ExternalHandler struct {
 	op string
