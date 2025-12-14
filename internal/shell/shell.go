@@ -84,7 +84,7 @@ func writeError(err error, info parser.ParsedInfo) {
 	var msg string
 
 	if err != nil {
-		msg = err.Error() + "\n"
+		msg = err.Error()
 	}
 
 	for _, errPath := range info.ErrRedirectNew {
@@ -95,7 +95,7 @@ func writeError(err error, info parser.ParsedInfo) {
 
 	for _, errPath := range info.ErrRedirectRest {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		_, _ = file.WriteString(msg)
+		_, _ = file.WriteString(msg + "\n")
 		_ = file.Close()
 	}
 
