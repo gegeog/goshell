@@ -68,18 +68,15 @@ func writeLine(s string, info parser.ParsedInfo) {
 	}
 
 	for _, outPath := range info.OutputRedirectsNew {
-		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE, 0644)
+		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		_, _ = file.WriteString(s)
 		_ = file.Close()
 	}
 
 	for _, outPath := range info.OutputRedirectsRest {
 		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		if len(s) == 0 {
-			_, _ = file.WriteString(s)
-		} else {
-			_, _ = file.WriteString(s + "\n")
-		}
+
+		fmt.Fprintln(file, strings.TrimRight(s, "\n"))
 		_ = file.Close()
 	}
 }
@@ -92,18 +89,21 @@ func writeError(err error, info parser.ParsedInfo) {
 	}
 
 	for _, errPath := range info.ErrRedirectNew {
-		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE, 0644)
+		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		_, _ = file.WriteString(msg)
 		_ = file.Close()
 	}
 
 	for _, errPath := range info.ErrRedirectRest {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		if len(msg) == 0 {
-			_, _ = file.WriteString(msg)
-		} else {
-			_, _ = file.WriteString(msg + "\n")
-		}
+		//if len(msg) == 0 {
+		//	_, _ = file.WriteString(msg)
+		//} else {
+		//	_, _ = file.WriteString(msg)
+		//}
+
+		fmt.Fprintln(file, strings.TrimRight(msg, "\n"))
+
 		_ = file.Close()
 	}
 
