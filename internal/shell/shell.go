@@ -70,7 +70,7 @@ func writeLine(s string, info parser.ParsedInfo) {
 	for _, outPath := range info.OutputRedirectsNew {
 		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if s != "" {
-			fmt.Fprintln(file, strings.TrimRight(s, "\n"))
+			fmt.Fprintln(file, s)
 		}
 		_ = file.Close()
 	}
@@ -79,7 +79,7 @@ func writeLine(s string, info parser.ParsedInfo) {
 		file, _ := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 
 		if s != "" {
-			fmt.Fprintln(file, strings.TrimRight(s, "\n"))
+			fmt.Fprintln(file, s)
 		}
 		_ = file.Close()
 	}
@@ -95,7 +95,7 @@ func writeError(err error, info parser.ParsedInfo) {
 	for _, errPath := range info.ErrRedirectNew {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if msg != "" {
-			fmt.Fprintln(file, strings.TrimRight(msg, "\n"))
+			fmt.Fprintln(file, msg)
 		}
 		_ = file.Close()
 	}
@@ -103,7 +103,7 @@ func writeError(err error, info parser.ParsedInfo) {
 	for _, errPath := range info.ErrRedirectRest {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 		if msg != "" {
-			fmt.Fprintln(file, strings.TrimRight(msg, "\n"))
+			fmt.Fprintln(file, msg)
 		}
 
 		_ = file.Close()
