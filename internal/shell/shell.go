@@ -102,11 +102,6 @@ func writeError(err error, info parser.ParsedInfo) {
 
 	for _, errPath := range info.ErrRedirectRest {
 		file, _ := os.OpenFile(errPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		//if len(msg) == 0 {
-		//	_, _ = file.WriteString(msg)
-		//} else {
-		//	_, _ = file.WriteString(msg)
-		//}
 		if msg != "" {
 			fmt.Fprintln(file, strings.TrimRight(msg, "\n"))
 		}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/codecrafters-io/shell-starter-go/internal/command"
 )
@@ -36,5 +37,5 @@ func (eh ExternalHandler) Run(context []string) (string, error) {
 		return string(out), fmt.Errorf(buf.String())
 	}
 
-	return string(out), nil
+	return strings.TrimRight(string(out), "\n"), nil
 }
