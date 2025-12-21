@@ -1,22 +1,31 @@
 package shell
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
 
+	"github.com/chzyer/readline"
 	"github.com/codecrafters-io/shell-starter-go/internal/handlers"
 	"github.com/codecrafters-io/shell-starter-go/internal/parser"
 	"github.com/codecrafters-io/shell-starter-go/internal/router"
 )
 
 func ListenAndServe(r router.Router) error {
-	reader := bufio.NewReader(os.Stdin)
+	completer := readline.NewPrefixCompleter(
+		readline.PcItem("echo"),
+		readline.PcItem("exit"),
+		readline.PcItem("cd"),
+		readline.PcItem("pwd"),
+		readline.PcItem("type"),
+	)
+	rl, _ := readline.NewEx(&readline.Config{
+		Prompt:       "$ ",
+		AutoComplete: completer,
+	})
 	for {
-		fmt.Fprint(os.Stdout, "$ ")
-		command, err := reader.ReadString('\n')
+		command, err := rl.Readline()
 		if err != nil {
 			return errors.New(fmt.Sprintf("Error reading input: %v\n", err))
 		}
